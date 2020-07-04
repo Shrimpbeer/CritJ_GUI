@@ -41,6 +41,8 @@ max_y = -500
 min_y = 500
 max_k = -500
 min_k = 500
+max_ev = -500
+min_ev = 500
 
 for e in xList:
     if e > max_x:
@@ -57,11 +59,16 @@ for e in K_value:
         max_k = e
     if e < min_k:
         min_k = e
+for e in Ego_v:
+    if e > max_ev:
+        max_ev = e
+    if e < min_ev:
+        min_ev = e
 
 ################ Initialization ##########################################
 window = tk.Tk()
 window.title("Cute Picture") # 摸摸哒
-window.geometry("800x600")
+window.geometry("800x800")
 
 ############## Frame 1 / upper area of GUI ###############################
 
@@ -69,9 +76,11 @@ frame1 = tk.Frame(height=400, width=800)
 frame1.pack()
 # tk.Label(window, text="小车位置", bg="gray", font=LARGE_FONT).pack()
 
-f = Figure(figsize=(10, 5), dpi=80)
-a = f.add_subplot(121)
-b = f.add_subplot(122)
+f = Figure(figsize=(10, 8), dpi=80)
+
+a = f.add_subplot(221)
+b = f.add_subplot(222)
+c = f.add_subplot(212)
 
 a.set(xlim=[min_x, max_x], ylim=[min_y, max_y], title="Position", xlabel="X Position", ylabel="Y Position")
 a.plot(xList[0], yList[0], "-ro")
@@ -80,13 +89,22 @@ b.set(xlim=[0, 75], ylim=[min_k, max_k], title="Criticality trajectory", xlabel=
 b.plot(time, K_value, "-g")
 MarkersOn = [0]
 b.plot(0, K_value[0], "-gD", markevery=MarkersOn)
+# b.annotate(str(K_value[0]), xy=(0, K_value[0]+5))
+b.text(10, max_k*0.8, "Criticality = " + str(K_value[0]),
+       bbox={"facecolor": "red", "alpha": 0.5, "pad": 10})
 
+c.set(xlim=[0, 75], ylim=[min_ev, max_ev], title="Ego car velocity", xlabel="Time", ylabel="Velocity")
+c.plot(time, Ego_v, "-b")
+MarkersOn_v = [0]
+c.plot(0, Ego_v[0], "-bs", markevery=MarkersOn_v)
+
+f.tight_layout()
 canvas = FigureCanvasTkAgg(f, frame1)
 canvas.draw()
 canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 ############## Frame 2 / The Scale / slider ##############################
-frame2 = tk.Frame(height=100, width=400)
+frame2 = tk.Frame(height=0, width=400)
 frame2.pack()
 l = tk.Label(window, fg="black", font=LARGE_FONT, width=30, height=2, text="Initial position and criticality")
 l.pack()
@@ -97,6 +115,7 @@ def print_selection(v):
     l.config(text="Time point: " + str(realtime) + " second")
     a.clear()
     b.clear()
+    c.clear()
     a.set(xlim=[min_x, max_x], ylim=[min_y, max_y], title="Position", xlabel="X Position", ylabel="Y Position")
     a.plot(xList[int(v)], yList[int(v)], "-ro")
 
@@ -104,6 +123,15 @@ def print_selection(v):
     b.plot(time, K_value, "-g")
     MarkersOn = int(v)
     b.plot(int(v), K_value[int(v)], "-gD", markevery=MarkersOn)
+    # b.annotate(str(K_value[int(v)]), xy=(int(v), K_value[int(v)] + 5))
+    b.text(10, max_k * 0.8, "Criticality = " + str(K_value[int(v)]),
+           bbox={"facecolor": "red", "alpha": 0.5, "pad": 10})
+
+    c.set(xlim=[0, 75], ylim=[min_ev, max_ev], title="Ego car velocity", xlabel="Time", ylabel="Velocity")
+    c.plot(time, Ego_v, "-b")
+    MarkersOn_v = int(v)
+    c.plot(int(v), Ego_v[int(v)], "-bs", markevery=MarkersOn_v)
+
     canvas.draw()
    # b.clear()
 
